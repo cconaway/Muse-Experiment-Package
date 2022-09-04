@@ -1,24 +1,15 @@
+import queue
 
-import collections
-import csv
-
-
-class DataLogger(object):
+class DataLogger(queue.Queue):
     
-    def __init__(self, filename=None):
-        self.path = './'
-        self.filename = filename
+    def __init__(self):
+        super().__init__(maxsize=10)
+    
+    def set_message(self, address: str, *args): #sets into queue
+        self.put(args)
 
-        self.batch = collections.deque()
-        self.batchsize = 256 * 5 #every 5 seconds
+    def record_message(self):
+        return self.get()
 
-    def write_to_file(self, *args):
-        with open('{}{}.csv'.format(self.path, self.filename), 'w', newline="") as csvfile:
-            csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(['address', 'args']) #or something like this
-
-    def batch_data(self, *args):
-        self.batch.append(args)
-        if len(self.batch) == self.batchsize:
-            yield self.batch
-
+    
+"""Think through how to access the datalog and plana thread option"""
