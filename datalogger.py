@@ -7,6 +7,7 @@ class DataLogger(queue.Queue):
     
     def __init__(self):
         super().__init__(maxsize=1024)
+        self.start_time = 0
 
     
     def set_message(self, *args): #sets into queue
@@ -24,6 +25,8 @@ class DataLogger(queue.Queue):
             logging.debug("Got {} from queue, queue size is {}".format(val, self.qsize()))
             return val
 
+    def set_start_time(self, time):
+        self.start_time = time
 
             
 
