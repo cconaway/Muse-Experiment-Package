@@ -1,7 +1,8 @@
 import sys
-from threading
+import threading
 import time
 import concurrent.futures
+import logging
 
 from pythonosc import osc_server
 from pythonosc.dispatcher import Dispatcher
@@ -11,23 +12,36 @@ from datalogger import DataLogger
 
 
 def main():
-    server_ip = '127.0.0.1'
+    format = "%(asctime)s: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
+    logging.getLogger().setLevel(logging.DEBUG)
+
+    server_ip = '192.168.0.35'
     server_port = 8000
-    dispatch = Dispatcher
+    dispatch = Dispatcher()
 
-    raw_eeg = DataLogger
-    dispatch.map("/muse/eeg",raw_eeg.set_message)
-    server = osc_server.ThreadingOSCUDPServer((server_ip, server_port), dispatcher=dispatch)
+    def reciever(address: str, datalogger, *args):
+        datalogger[0].set_message(args)
+        
+    def recorder(datalogger):
+        datalogger.record_message()
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        executor.submit(server.serve_forever)
-        executor.submit(raw_eeg.record_message)
+    datalog = DataLogger()
+    dispatch.map("/muse/eeg", reciever, datalog)
+    server = osc_server.BlockingOSCUDPServer((server_ip, server_port), dispatcher=dispatch)
+
+    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+    server_thread.start()
+    
+    while True: 
+        recorder(datalogger=datalog)
+        
 
 def shutdown():
     pass
 
 if __name__ == "__main__":
-    try: 
+    try:
         main()
     except KeyboardInterrupt:
         shutdown()
