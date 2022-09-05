@@ -3,6 +3,7 @@ import threading
 import time
 import concurrent.futures
 import logging
+import csv
 
 from pythonosc import osc_server
 from pythonosc.dispatcher import Dispatcher
@@ -24,7 +25,8 @@ def main():
         datalogger[0].set_message(args)
         
     def recorder(datalogger):
-        datalogger.record_message()
+        return datalogger.record_message()
+        
 
     datalog = DataLogger()
     dispatch.map("/muse/eeg", reciever, datalog)
@@ -33,8 +35,20 @@ def main():
     server_thread = threading.Thread(target=server.serve_forever, daemon=True)
     server_thread.start()
     
-    while True: 
-        recorder(datalogger=datalog)
+    with open('test.csv', 'w') as file:
+        writer = csv.writer(file)
+
+        while True: #This will need to change into some time based event thing.
+            val = recorder(datalogger=datalog)
+            
+            if val:
+                logging.debug("Output value is {}".format(val))
+                writer.writerow(val[0])
+
+            """need to get the right context out of the csv."""
+            
+
+
         
 
 def shutdown():
