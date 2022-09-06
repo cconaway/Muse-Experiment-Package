@@ -12,6 +12,7 @@ from pythonosc.dispatcher import Dispatcher
 
 # Import Internal Libraries
 from datalogger import DataLogger
+from timedevents import Scheduler
 
 
 def main():
@@ -30,17 +31,13 @@ def main():
     logging.getLogger().setLevel(logging.DEBUG)
 
     #Server Setup
-    server_ip = '192.168.0.35'
+    server_ip = "127.0.0.1"#'192.168.0.35'
     server_port = 8000
     dispatch = Dispatcher()
 
-    #Datalog and Threads
+    #Datalog 
     datalog = DataLogger()
-    event = threading.Event()
-    dispatch.map("/muse/eeg", reciever, datalog, event)
-    server = osc_server.BlockingOSCUDPServer((server_ip, server_port), dispatcher=dispatch)
-    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
-    server_thread.start()
+    reciever_event = threading.Event()
 
     def reciever(address: str, fixed_args, *args):
         
@@ -53,18 +50,27 @@ def main():
 
         #Pull Message from Queue and Record
         return datalogger.record_message()
+
+    #Server
+    dispatch.map("/muse/eeg", reciever, datalog, reciever_event)
+    server = osc_server.BlockingOSCUDPServer((server_ip, server_port), dispatcher=dispatch)
+    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+    server_thread.start()
     
     #Establish the CSV context for the recording.
     with open('test_2.csv', 'w') as file:
         writer = csv.writer(file)
 
         input("Press anything and enter to proceed") #The Current time sync is this.
-        
+        scheduler = Scheduler()
+
         start_time = time.perf_counter()
         datalog.set_start_time(start_time)
-        event.set() #Triggers Receiver 
+
+        reciever_event.set() #Triggers Receiver
 
         while True: #Set to some time based event.
+            scheduler.run()
             val = recorder(datalogger=datalog) 
             if val:
                 logging.debug("Output value is {}".format(val))
