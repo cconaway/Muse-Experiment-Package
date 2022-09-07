@@ -62,16 +62,17 @@ def main():
         writer = csv.writer(file)
 
         input("Press anything and enter to proceed") #The Current time sync is this.
+        #Arm everything
         scheduler = Scheduler()
-
         start_time = time.perf_counter()
         datalog.set_start_time(start_time)
 
+        #Run it and set flags.
         reciever_event.set() #Triggers Receiver
         scheduler.run()
 
         while True: #Set to some time based event.
-            val = recorder(datalogger=datalog) 
+            val = recorder(datalogger=datalog) #Recorder to both get the datalog and the schedulers return.
             if val:
                 logging.debug("Output value is {}".format(val))
                 writer.writerow(val)
