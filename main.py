@@ -68,19 +68,23 @@ def main():
         datalog.set_start_time(start_time)
 
         reciever_event.set() #Triggers Receiver
+        scheduler.run()
 
         while True: #Set to some time based event.
-            scheduler.run()
             val = recorder(datalogger=datalog) 
             if val:
                 logging.debug("Output value is {}".format(val))
                 writer.writerow(val)
 
+            if scheduler.run_experiment == False:
+                break
+
 def shutdown():
-    pass
+    print('Shutting Down Experiment')
 
 if __name__ == "__main__":
     try:
         main()
+        shutdown()
     except KeyboardInterrupt:
         shutdown()
