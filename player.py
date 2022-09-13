@@ -1,39 +1,38 @@
 
 """
-Half sine tone generator, half audio file player.
+Audio Player
 
-If the player is playing a sound, log it in the csv.
+Needs to Log to Csv
 """
 
-
-import numpy as np
 import threading
-import pyaudio
+import os
+import random
+
+import simpleaudio as sa
+import numpy as np
 
 class SoundPlayer(object):
 
     def __init__(self):
-        self.audio_context = pyaudio.PyAudio()
-        self.stream = ''
+        #self.wave_obj = sa.WaveObject.from_wave_file('sound.wav')
 
-        fs = 44100       # sampling rate, Hz, must be integer
-        duration = 1.0   # in seconds, may be float
-        f = 440.0        # sine frequency, Hz, may be float
-        self.samples = (np.sin(2*np.pi*np.arange(fs*duration)*f/fs)).astype(np.float32)
+        self.sound_set = []
+        for wave_file in os.listdir('/wavefiles'):
+            self.sound_set.append(sa.WaveObject.from_wave_file(wave_file))
+            
 
-    def open_context(self):
-        self.stream = self.audio_context.open(format=pyaudio.paFloat32,
-                channels=1,
-                rate=44100,
-                output=True)
+    def play_sound(self, sound_name):
+        print(sound_name)
+        #play_obj = self.wave_obj.play()
+        #play_obj.wait_done()  # Wait until sound has finished playing
 
-    def write_to_stream(self):
-        volume = 0.5
-        self.stream.write(volume*self.samples)
+    def play_randomsound(self):
+        sound = random.choice(self.sound_set)
+        #play_obj = sound.play()
+        #play_obj.wait_done()
 
-        self.stream.stop_stream()
-        self.stream.close()  
-        self._terminate()
 
-    def _terminate(self):
-        self.audio_context.terminate()
+"""Todo:
+
+    Create a .mp3/.wav player to play at specific times."""

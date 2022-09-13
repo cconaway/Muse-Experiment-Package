@@ -12,7 +12,7 @@ from pythonosc.dispatcher import Dispatcher
 
 # Import Internal Libraries
 from datalogger import DataLogger
-from timedevents import Scheduler
+from scheduler import Scheduler
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
     logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
     logging.getLogger().setLevel(logging.DEBUG)
 
-    #Server Setup
+    # Server Setup
     server_ip = "127.0.0.1"#'192.168.0.35'
     server_port = 8000
     dispatch = Dispatcher()
@@ -39,13 +39,15 @@ def main():
     datalog = DataLogger()
     reciever_event = threading.Event()
 
+    #Reciever - interfaces with the Muse out directly.
     def reciever(address: str, fixed_args, *args):
-        
+
         #If Event is Set -> Place time and Args in Queue
         if fixed_args[1].is_set(): 
             rec_time = time.perf_counter() - fixed_args[0].start_time
             fixed_args[0].set_message(rec_time, args[0], args[1], args[2], args[3], args[4]) #datalogger, event
         
+    #Recorder pulls messages from the queue
     def recorder(datalogger):
 
         #Pull Message from Queue and Record
@@ -58,8 +60,9 @@ def main():
     server_thread.start()
     
     #Establish the CSV context for the recording.
-    with open('test_2.csv', 'w') as file:
+    with open('data/test_2.csv', 'w') as file:
         writer = csv.writer(file)
+
 
         input("Press anything and enter to proceed") #The Current time sync is this.
         #Arm everything
