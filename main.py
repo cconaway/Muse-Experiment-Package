@@ -76,9 +76,11 @@ def main():
     with open('data/test_3.csv', 'w') as file:
         writer = csv.writer(file)
 
-        input("Press anything and enter to proceed") #The Current time sync is this.
         #Arm everything
         scheduler = Scheduler(event_flag=scheduled_event)
+        
+        #current sync barrier
+        input("Press anything and enter to proceed") #The Current time sync is this.
         start_time = time.perf_counter()
         datalog.set_start_time(start_time)
 
