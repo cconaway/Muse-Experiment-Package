@@ -23,7 +23,9 @@ class Scheduler():
 
         """Where jobs get added"""
         self.scheduler.add_job(self.printer, trigger='interval', seconds=3)
-        self.scheduler.add_job(sp.play_sound, args=['sound1'], trigger='interval' ,  seconds=6)
+        #self.scheduler.add_job(sp.play_sound, args=['Tone2.wav'], trigger='interval' ,  seconds=7)
+        self.scheduler.add_job(sp.play_randomsound, trigger='interval' ,  seconds=7)
+        
         self.scheduler.add_job(self.end_experiment, trigger='interval', seconds=12, id='end_experiment')
     
     def run(self):

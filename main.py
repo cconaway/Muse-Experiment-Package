@@ -108,6 +108,4 @@ if __name__ == "__main__":
         shutdown()
 
 
-"""Within Reciever function set ability to write flags to the rows based on scheduled events.
-
-    Need some type of flag set."""
+"""Next up is setting Various wave file tests and names and recording to the log."""
