@@ -33,15 +33,17 @@ def main():
     logging.getLogger().setLevel(logging_level)
 
     # Server Setup
-    server_ip = '192.168.0.35'
+    server_ip = '127.0.0.1' #'192.168.0.35'
     server_port = 8000
     dispatch = Dispatcher()
 
     #Datalog 
-    datalog = DataLogger()
+    datalog = DataLogger() #can it be cleared before we set things up.
     reciever_event = threading.Event()
-    scheduled_event = threading.Event()
 
+    scheduled_event = threading.Event() #can events carry info? No so instead we put it to some global
+    scheduler = Scheduler(event_flag=scheduled_event)
+    
     #Reciever - interfaces with the Muse out directly.
     def reciever(address: str, fixed_args, *args):
 
@@ -53,7 +55,8 @@ def main():
                 logging.info('Scheduled Task has been added to log.')
                 fixed_args[2].clear()
 
-                scheduled_task = 'Task Completed'
+                scheduled_task = fixed_args[3] #event data
+                print('SCHEDULE MARK', fixed_args[3])
             else:
                 scheduled_task = None
             
@@ -67,17 +70,21 @@ def main():
         return datalogger.record_message()
 
     #Server
-    dispatch.map("/muse/eeg", reciever, datalog, reciever_event, scheduled_event)
+    """Event Data needs to come through the scheduled"""
+
+    dispatch.map("/muse/eeg", reciever, datalog, reciever_event, scheduled_event, scheduler.current_event)
     server = osc_server.BlockingOSCUDPServer((server_ip, server_port), dispatcher=dispatch)
     server_thread = threading.Thread(target=server.serve_forever, daemon=True)
     server_thread.start()
+
+
     
     #Establish the CSV context for the recording.
     with open('data/test_3.csv', 'w') as file:
         writer = csv.writer(file)
 
         #Arm everything
-        scheduler = Scheduler(event_flag=scheduled_event)
+        
         
         #current sync barrier
         input("Press anything and enter to proceed") #The Current time sync is this.

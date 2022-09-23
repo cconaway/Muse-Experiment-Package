@@ -9,6 +9,7 @@ import threading
 import time
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 
 from player import SoundPlayer
 
@@ -16,8 +17,11 @@ class Scheduler():
 
     def __init__(self, event_flag):
         self.scheduler = BackgroundScheduler()
+        self.scheduler.add_listener(self._listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
         self.run_experiment = True #Maintains the threading loops
         self.event_flag = event_flag #threading event flag
+
+        self.current_event = ''
 
         sp = SoundPlayer()
 
@@ -25,16 +29,23 @@ class Scheduler():
         self.scheduler.add_job(self.printer, trigger='interval', seconds=3)
         #self.scheduler.add_job(sp.play_sound, args=['Tone2.wav'], trigger='interval' ,  seconds=7)
         self.scheduler.add_job(sp.play_randomsound, trigger='interval' ,  seconds=7)
-        
         self.scheduler.add_job(self.end_experiment, trigger='interval', seconds=12, id='end_experiment')
-    
+
+    def _listener(self, event):
+        if not event.exception:
+            job = self.scheduler.get_job(event.job_id)
+            self.current_event = job.name
+
+            print('Event Data', self.current_event)
+
     def run(self):
         self.scheduler.start()
 
     #Current Job - Temporary
     def printer(self):
         print("Hello there")
-        self._set_event_flag()
+        self._set_event_flag() #currently the flag lives here. the event flag is
+        # a binary sync trigger that denotes when
 
         #find a way to send writes to function.
         
@@ -43,16 +54,12 @@ class Scheduler():
         self.run_experiment = False
         self.scheduler.remove_job('end_experiment')
     
-
     def _set_event_flag(self):
         self.event_flag.set()
 
-"""Need a way to log when a timed event happens within the data
 
-    GET DATETIME of Current Date
-    Then schedule the events based on the current dates. plus ttimedeltas?
-    
-    """
+        """idea 1, using the add job function make a list of all available
+            jobs in the queue
+            
+            """
 
-    #its possible that the event flag cant be set inside the class
-    #instead pass it as an arg to the scheduled tasks.
