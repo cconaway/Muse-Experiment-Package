@@ -36,6 +36,9 @@ class Scheduler():
     def run(self):
         self.scheduler.start()
 
+
+        
+
     #Current Job - Temporary
     def printer(self):
         print("Hello there")
@@ -44,6 +47,9 @@ class Scheduler():
 
         #find a way to send writes to function.
         
+
+
+
     #Ends Experiment
     def end_experiment(self):
         self.run_experiment = False
@@ -52,8 +58,4 @@ class Scheduler():
     def _set_event_flag(self):
         self.event_flag.set()
 
-
-        """idea 1, using the add job function make a list of all available
-            jobs in the queue
-            """
 
