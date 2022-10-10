@@ -30,6 +30,9 @@ def main():
     server_port = 8000
     dispatch = Dispatcher()
 
+    #Set FileName
+    datafile_name = "test4"
+
     # Configure Datalog and it's reciever flag
     datalog = DataLogger() #can it be cleared before we set things up.
     reciever_event = threading.Event()
@@ -39,7 +42,7 @@ def main():
 
     #Configure Scheduler and scheduler flag
     scheduled_event = threading.Event() #can events carry info? No so instead we put it to some global
-    scheduler = Scheduler(event_flag=scheduled_event)
+    scheduler = Scheduler(event_flag=scheduled_event, data_filename=datafile_name)
 
     # Mapping dispatch to events and schedules, Start Server Thread
     dispatch.map("/muse/eeg", q.reciever, datalog, reciever_event, scheduled_event, scheduler)
@@ -48,7 +51,7 @@ def main():
     server_thread.start()
 
     # Establish the CSV context for the recording. Perform block sync.
-    with open('data/test_3.csv', 'w') as file:
+    with open('data/{}.csv'.format(datafile_name), 'w') as file:
         writer = csv.writer(file)
 
         #Current sync barrier

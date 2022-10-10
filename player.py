@@ -8,15 +8,15 @@ Needs to Log to Csv
 import threading
 import os
 import random
+import csv
+import logging
 
 import simpleaudio as sa
 import numpy as np
 
-import logging
-
 class SoundPlayer(object):
 
-    def __init__(self):
+    def __init__(self, data_filename):
         
         #Gets sounds from wavefiles.
         self.sound_set = {}
@@ -27,6 +27,7 @@ class SoundPlayer(object):
             self.sound_set.setdefault(wave_file, sound)
 
         self.sound_log = []
+        self.data_filename = data_filename
 
     def _set_event_flag(self, event_flag):
         event_flag.set()
@@ -49,6 +50,11 @@ class SoundPlayer(object):
         play_obj = sound.play()
         play_obj.wait_done()
         self._set_event_flag(args[-1])
-        
+
         self.sound_log.append(sound)
 
+    def write_log_to_csv(self):
+        with open('data/{}.csv'.format(self.data_filename), 'w') as file:
+            writer = csv.writer(file)
+            writer.writerows(self.sound_log)
+        logging.info('Logged the order of the sounds!')
