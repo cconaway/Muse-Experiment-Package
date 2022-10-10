@@ -1,10 +1,3 @@
-
-"""
-This needs to be something that triggers timed thread events.
-
-
-"""
-
 import threading
 import time
 
@@ -22,7 +15,6 @@ class Scheduler():
         self.event_flag = event_flag #threading event flag
 
         self.current_event = ''
-
         sp = SoundPlayer()
 
         """Where jobs get added"""
@@ -31,12 +23,15 @@ class Scheduler():
         self.scheduler.add_job(sp.play_randomsound, trigger='interval' ,  seconds=7)
         self.scheduler.add_job(self.end_experiment, trigger='interval', seconds=12, id='end_experiment')
 
+    def get_current_event(self):
+        return self.current_event
+        
     def _listener(self, event):
         if not event.exception:
             job = self.scheduler.get_job(event.job_id)
             self.current_event = job.name
 
-            print('Event Data', self.current_event)
+            print('logging current event', self.current_event)
 
     def run(self):
         self.scheduler.start()
@@ -60,6 +55,5 @@ class Scheduler():
 
         """idea 1, using the add job function make a list of all available
             jobs in the queue
-            
             """
 

@@ -28,7 +28,6 @@ class SoundPlayer(object):
 
     def play_sound(self, sound_name):
 
-        
         logging.info('Playing {}'.format(sound_name))
         play_obj = self.sound_set[sound_name].play()
         play_obj.wait_done()  # Wait until sound has finished playing
@@ -36,7 +35,7 @@ class SoundPlayer(object):
 
     def play_randomsound(self):
 
-        "Have this have a label of the sound played."
+        "Needs to send an event flag."
 
         sound = random.choice(list(self.sound_set.values()))
         logging.info('Playing Random Sound {}'.format(sound))
